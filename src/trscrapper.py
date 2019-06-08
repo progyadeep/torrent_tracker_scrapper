@@ -31,25 +31,34 @@ def collectTrackers(urlstr):
             trackers.append(a[i])
 
 #-----------------------------------------------------------------------------------
-print("Quering @ https://startpage.com ...")
-r = requests.get("https://www.startpage.com/do/asearch?q=torrent+tracker+list").text
-print("Results fetched.")
+p = int(input("How many search result pages do you want me to dig? "))
+q = "https://google.com/search?q=torrent+tracker+list&start="
+i = 0
 
-soup = BeautifulSoup(r, 'html.parser')
-print("Collecting trackers (this can take some time depending on your internet speed. BE PATIENT) ...", end='')
-arr = soup.find_all('h3', 'search-item__title')
+while i < p:
+    print("\nQuering @ https://google.com ... (Page "+str(i+1)+")...")
+    r = requests.get(q+str(i*10)).text
+    i = i + 1
+    print("Results fetched.\nParsing URLs and scrapping trackers (this can take some time depending on your internet speed. BE PATIENT)...", end='')
 
-wct = 0
-for a in arr:
-    print(".", end='')
-    t = str(a).lower()
-    if "torrent" in t and "tracker" in t and "list" in t:
-        i = t.index("<a href=\"") + 9
-        j = t[i:].index("\"")
-        collectTrackers(t[i:i+j])
-        wct = wct + 1
+    soup = BeautifulSoup(r, 'html.parser')
+    arr = soup.find_all('a')
+
+    wct = 0
+    for a in range(16, len(arr)):
+        print(".", end='')
+        t = str(arr[a]).lower()
+        if "torrent" in t and "tracker" in t and "list" in t:
+            try:
+                i = t.index("http")
+                j = t[i:].index("\"")
+                t = t[i:i+j]
+                collectTrackers(t[0:t.index("&amp;")])
+                wct = wct + 1
+            except:
+                continue
         
-print("\nCollected "+str(len(trackers))+" trackers from "+str(wct)+" websites.")
+print("\n\nCollected "+str(len(trackers))+" trackers from "+str(wct)+" websites.")
 
 print("Writing to file ...")
 c = ""
