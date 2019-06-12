@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import os
 
 trackers = []
+wct = 0
 
 def collectTrackers(urlstr):
     global trackers
@@ -33,18 +34,17 @@ def collectTrackers(urlstr):
 #-----------------------------------------------------------------------------------
 p = int(input("How many search result pages do you want me to dig? "))
 q = "https://google.com/search?q=torrent+tracker+list&start="
-i = 0
+pi = 0
 
-while i < p:
-    print("\nQuering @ https://google.com ... (Page "+str(i+1)+")...")
-    r = requests.get(q+str(i*10)).text
-    i = i + 1
+while pi < p:
+    print("\nQuering @ https://google.com ... (Page "+str(pi+1)+")...")
+    r = requests.get(q+str(pi*10)).text
+    pi = pi + 1
     print("Results fetched.\nParsing URLs and scrapping trackers (this can take some time depending on your internet speed. BE PATIENT)...", end='')
 
     soup = BeautifulSoup(r, 'html.parser')
     arr = soup.find_all('a')
 
-    wct = 0
     for a in range(16, len(arr)):
         print(".", end='')
         t = str(arr[a]).lower()
@@ -57,6 +57,7 @@ while i < p:
                 wct = wct + 1
             except:
                 continue
+    print()
         
 print("\n\nCollected "+str(len(trackers))+" trackers from "+str(wct)+" websites.")
 
